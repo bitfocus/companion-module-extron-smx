@@ -231,7 +231,7 @@ instance.prototype.actions = function(system) {
 			}]
 		},
 		'savePlaneP': {
-			label: 'Recall plane preset',
+			label: 'Save plane preset',
 			options: [{
 					type: 'textinput',
 					label: 'plane',
@@ -245,7 +245,7 @@ instance.prototype.actions = function(system) {
 			}]
 		},
 		'saveGlobalP': {
-			label: 'Recall global preset',
+			label: 'Save global preset',
 			options: [{
 					type: 'textinput',
 					label: 'preset',
