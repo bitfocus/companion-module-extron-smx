@@ -13,7 +13,7 @@
 * **Input to all Outputs** Route an input to all outputs, choose between Audio & Video, Audio only, Video only
 * **Recall Plane Preset** Recall a saved Plane Preset
 * **Recall Global Preset** Recall a saved Global Preset
-* **Save Plane Preset** Save a saved Plane Preset
-* **Save Global Preset** Save a saved Global Preset
+* **Save Plane Preset** Save Current Plane Config to a Plane Preset
+* **Save Global Preset** Save Current Gobal Config to a Global Preset
 
 > This module is using Extron SIS commands which is standard for most Extron hardware and could be used as a starting point for other hardware.
