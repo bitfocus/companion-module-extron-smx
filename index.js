@@ -31,7 +31,7 @@ instance.prototype.incomingData = function(data) {
 
 	// Match part of the copyright response from unit when a connection is made.
 	// Send Info request which should reply with Matrix setup, eg: "V8X4 A8X4"
-	if (self.login === false && data.match("Extron Electronics SMX")) {
+	if (self.login === false && data.match("Extron Electronics")) {
 		self.status(self.STATUS_WARNING,'Logging in');
 		self.socket.write("I"+ "\n");
 	}
