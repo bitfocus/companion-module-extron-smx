@@ -41,6 +41,17 @@ instance.prototype.incomingData = function(data) {
 		self.socket.write(""+ "\n");
 	}
 
+	if (self.login === true && self.socket.connected) {
+		var beat_period = 180
+		
+		setInterval(function () {
+			self.login = false;
+			self.status(self.STATUS_WARNING,'Checking Connection');
+			self.socket.write("1I"+ "\n"); // should respond with Switcher description (short) eg: Inf01*SMX
+			debug("Checking Connection");
+		}, beat_period * 1000);
+	}
+
 	// Match first letter of expected response from unit.
 	else if (self.login === false && data.match("V")) {
 		self.login = true;
@@ -50,6 +61,11 @@ instance.prototype.incomingData = function(data) {
 	else if (self.login === false && data.match('login incorrect')) {
 		self.log('error', "incorrect username/password (expected no password)");
 		self.status(self.STATUS_ERROR, 'Incorrect user/pass');
+	}
+	else if (self.login === false && data.match("SMX")) {
+		self.login = true;
+		self.status(self.STATUS_OK);
+		debug("Connection OK");
 	}
 	else {
 		debug("data nologin", data);
