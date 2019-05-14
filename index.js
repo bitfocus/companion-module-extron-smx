@@ -27,6 +27,8 @@ instance.prototype.updateConfig = function(config) {
 
 instance.prototype.incomingData = function(data) {
 	var self = this;
+	var beat_period = 180
+	var heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
 	debug(data);
 
 	// Match part of the copyright response from unit when a connection is made.
@@ -51,16 +53,14 @@ instance.prototype.incomingData = function(data) {
 		self.log('error', "incorrect username/password (expected no password)");
 		self.status(self.STATUS_ERROR, 'Incorrect user/pass');
 	}
-	// Heatbeat send Query
-	if (self.login === true && self.socket.connected) {
-		var beat_period = 180
-		
-		setInterval(function () {
+	// Heatbeat to keep connection alive
+	if (self.login === true && self.socket.connected) {		
+		function heartbeat() {
 			self.login = false;
 			self.status(self.STATUS_WARNING,'Checking Connection');
 			self.socket.write("1I"+ "\n"); // should respond with Switcher description (short) eg: Inf01*SMX
 			debug("Checking Connection");
-		}, beat_period * 1000);
+		},
 	}
 	else if (self.login === false && data.match("Inf01")) {
 		self.login = true;
@@ -68,6 +68,7 @@ instance.prototype.incomingData = function(data) {
 		debug("Connection OK");
 	}
 	else {
+		clearInterval heartbeat_interval;
 		debug("data nologin", data);
 	}
 };
