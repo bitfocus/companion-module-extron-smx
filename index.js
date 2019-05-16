@@ -60,7 +60,7 @@ instance.prototype.incomingData = function(data) {
 			self.status(self.STATUS_WARNING,'Checking Connection');
 			self.socket.write("1I"+ "\n"); // should respond with Switcher description (short) eg: Inf01*SMX
 			debug("Checking Connection");
-		},
+		}
 	}
 	else if (self.login === false && data.match("Inf01")) {
 		self.login = true;
