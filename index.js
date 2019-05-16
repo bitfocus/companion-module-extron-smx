@@ -27,8 +27,6 @@ instance.prototype.updateConfig = function(config) {
 
 instance.prototype.incomingData = function(data) {
 	var self = this;
-	var beat_period = 180
-	var heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
 	debug(data);
 
 	// Match part of the copyright response from unit when a connection is made.
@@ -55,6 +53,8 @@ instance.prototype.incomingData = function(data) {
 	}
 	// Heatbeat to keep connection alive
 	if (self.login === true && self.socket.connected) {		
+		var beat_period = 180
+		var heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
 		function heartbeat() {
 			self.login = false;
 			self.status(self.STATUS_WARNING,'Checking Connection');
@@ -68,7 +68,7 @@ instance.prototype.incomingData = function(data) {
 		debug("Connection OK");
 	}
 	else {
-		clearInterval heartbeat_interval;
+		clearInterval (heartbeat_interval);
 		debug("data nologin", data);
 	}
 };
