@@ -67,14 +67,6 @@ instance.prototype.incomingData = function(data) {
 		self.status(self.STATUS_OK);
 		debug("Connection OK");
 	}
-	// Stop Heartbeat if instance Disabled (Not Working)
-	else if (self.login === true && self.socket.connected == false) {
-		function heartbeat_stop() {
-		clearInterval (heartbeat_interval); //Stop Heartbeat
-		self.login = false;
-		self.status(self.STATUS_WARNING,'No Heartbeat');
-		debug("Heartbeat Stopped");
-	}
 	else {
 		debug("data nologin", data);
 	}
@@ -175,6 +167,7 @@ instance.prototype.config_fields = function () {
 // When module gets deleted
 instance.prototype.destroy = function() {
 	var self = this;
+	clearInterval (heartbeat_interval); //Stop Heartbeat
 
 	if (self.socket !== undefined) {
 		self.socket.destroy();
