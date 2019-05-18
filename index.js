@@ -30,8 +30,8 @@ instance.prototype.incomingData = function(data) {
 	debug(data);
 
 	// Match part of the copyright response from unit when a connection is made.
-	// Send Info request which should reply with Matrix setup, eg: "V8X4 A8X4"
-	if (self.login === false && data.match("Extron Electronics SMX")) {
+	// Send Info request to SMX which should reply with Matrix setup, eg: "V8X4 A8X4"
+	if (self.login === false && data.match("Extron Electronics")) {
 		self.status(self.STATUS_WARNING,'Logging in');
 		self.socket.write("I"+ "\n");
 	}
@@ -51,7 +51,7 @@ instance.prototype.incomingData = function(data) {
 		self.log('error', "incorrect username/password (expected no password)");
 		self.status(self.STATUS_ERROR, 'Incorrect user/pass');
 	}
-	// Heatbeat to keep connection alive
+	// Heatbeat to keep connection alive (Working)
 	if (self.login === true && self.socket.connected) {		
 		var beat_period = 180; // Seconds
 		var heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
@@ -67,8 +67,15 @@ instance.prototype.incomingData = function(data) {
 		self.status(self.STATUS_OK);
 		debug("Connection OK");
 	}
-	else {
+	// Stop Heartbeat if instance Disabled (Not Working)
+	else if (self.login === true && self.socket.connected == false) {
+		function heartbeat_stop() {
 		clearInterval (heartbeat_interval); //Stop Heartbeat
+		self.login = false;
+		self.status(self.STATUS_WARNING,'No Heartbeat');
+		debug("Heartbeat Stopped");
+	}
+	else {
 		debug("data nologin", data);
 	}
 };
