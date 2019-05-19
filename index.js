@@ -63,7 +63,7 @@ instance.prototype.incomingData = function(data) {
 			debug("Checking Connection");
 		}
 	}
-	else if (self.login === false && data.match("Inf01")) {
+	else if (self.login === false && data.match("SMX")) {
 		self.login = true;
 		self.status(self.STATUS_OK);
 		debug("Connection OK");
