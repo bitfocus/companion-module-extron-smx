@@ -53,9 +53,9 @@ instance.prototype.incomingData = function(data) {
 	}
 	// Heatbeat to keep connection alive (Working)
 	if (self.login === true && self.socket.connected) {
-		clearInterval(heartbeat_interval);
+		clearInterval(self.heartbeat_interval);
 		var beat_period = 180; // Seconds
-		var heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
+		self.heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
 		function heartbeat() {
 			self.login = false;
 			self.status(self.STATUS_WARNING,'Checking Connection');
@@ -168,7 +168,7 @@ instance.prototype.config_fields = function () {
 // When module gets deleted
 instance.prototype.destroy = function() {
 	var self = this;
-	clearInterval (heartbeat_interval); //Stop Heartbeat
+	clearInterval (self.heartbeat_interval); //Stop Heartbeat
 
 	if (self.socket !== undefined) {
 		self.socket.destroy();
