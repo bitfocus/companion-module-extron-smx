@@ -53,7 +53,7 @@ instance.prototype.incomingData = function(data) {
 	}
 	// Heatbeat to keep connection alive (Working)
 	if (self.login === true && self.socket.connected) {
-		clearInterval(heartbeat_Interval);
+		clearInterval(heartbeat_interval);
 		var beat_period = 180; // Seconds
 		var heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
 		function heartbeat() {
