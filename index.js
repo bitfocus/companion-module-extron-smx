@@ -52,8 +52,8 @@ instance.prototype.incomingData = function(data) {
 		self.log('error', "incorrect username/password (expected no password)");
 		self.status(self.STATUS_ERROR, 'Incorrect user/pass');
 	}
-	// Heatbeat to keep connection alive (Working)
-	if (self.login === true && self.socket.connected) {
+	// Heatbeat to keep connection alive.
+	if (self.login === true) {
 		clearInterval(self.heartbeat_interval);
 		var beat_period = 180; // Seconds
 		self.heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
