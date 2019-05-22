@@ -42,7 +42,8 @@ instance.prototype.incomingData = function(data) {
 	}
 
 	// Match first letter of expected response from unit.
-	else if (self.login === false && data.match("V")) {
+	// Match heartbeat response
+	else if (self.login === false && data.match(/V|SMX/)) {
 		self.login = true;
 		self.status(self.STATUS_OK);
 		debug("logged in");
@@ -62,11 +63,6 @@ instance.prototype.incomingData = function(data) {
 			self.socket.write("1I"+ "\n"); // should respond with Switcher description (short) eg: Inf01*SMX
 			debug("Checking Connection");
 		}
-	}
-	else if (self.login === false && data.match("SMX")) {
-		self.login = true;
-		self.status(self.STATUS_OK);
-		debug("Connection OK");
 	}
 	else {
 		debug("data nologin", data);
