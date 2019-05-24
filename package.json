@@ -1,6 +1,6 @@
 {
 	"name": "extron-smx",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"api_version": "1.0.0",
 	"keywords": [
 		"Protocol",
@@ -8,7 +8,7 @@
 	],
 	"manufacturer": "Extron",
 	"product": "SMX Matrix",
-	"shortname": "Extron SMX Matrix",
+	"shortname": "SMX",
 	"description": "SMX Matrix plugin for Companion",
 	"main": "index.js",
 	"scripts": {

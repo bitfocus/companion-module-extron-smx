@@ -30,8 +30,8 @@ instance.prototype.incomingData = function(data) {
 	debug(data);
 
 	// Match part of the copyright response from unit when a connection is made.
-	// Send Info request which should reply with Matrix setup, eg: "V8X4 A8X4"
-	if (self.login === false && data.match("Extron Electronics SMX")) {
+	// Send Info request to SMX which should reply with Matrix setup, eg: "V8X4 A8X4"
+	if (self.login === false && data.match("Extron Electronics")) {
 		self.status(self.STATUS_WARNING,'Logging in');
 		self.socket.write("I"+ "\n");
 	}
@@ -42,7 +42,8 @@ instance.prototype.incomingData = function(data) {
 	}
 
 	// Match first letter of expected response from unit.
-	else if (self.login === false && data.match("V")) {
+	// Match heartbeat response
+	else if (self.login === false && data.match(/V|SMX/)) {
 		self.login = true;
 		self.status(self.STATUS_OK);
 		debug("logged in");
@@ -50,6 +51,18 @@ instance.prototype.incomingData = function(data) {
 	else if (self.login === false && data.match('login incorrect')) {
 		self.log('error', "incorrect username/password (expected no password)");
 		self.status(self.STATUS_ERROR, 'Incorrect user/pass');
+	}
+	// Heatbeat to keep connection alive.
+	if (self.login === true) {
+		clearInterval(self.heartbeat_interval);
+		var beat_period = 180; // Seconds
+		self.heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
+		function heartbeat() {
+			self.login = false;
+			self.status(self.STATUS_WARNING,'Checking Connection');
+			self.socket.write("1I"+ "\n"); // should respond with Switcher description (short) eg: Inf01*SMX
+			debug("Checking Connection");
+		}
 	}
 	else {
 		debug("data nologin", data);
@@ -151,6 +164,7 @@ instance.prototype.config_fields = function () {
 // When module gets deleted
 instance.prototype.destroy = function() {
 	var self = this;
+	clearInterval (self.heartbeat_interval); //Stop Heartbeat
 
 	if (self.socket !== undefined) {
 		self.socket.destroy();
