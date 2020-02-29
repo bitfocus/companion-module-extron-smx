@@ -25,50 +25,6 @@ instance.prototype.updateConfig = function(config) {
 	self.init_tcp();
 };
 
-instance.prototype.incomingData = function(data) {
-	var self = this;
-	debug(data);
-
-	// Match part of the copyright response from unit when a connection is made.
-	// Send Info request to SMX which should reply with Matrix setup, eg: "V8X4 A8X4"
-	if (self.login === false && data.match("Extron Electronics")) {
-		self.status(self.STATUS_WARNING,'Logging in');
-		self.socket.write("I"+ "\n");
-	}
-
-	if (self.login === false && data.match("Password:")) {
-		self.status(self.STATUS_WARNING,'Logging in');
-		self.socket.write(""+ "\n");
-	}
-
-	// Match first letter of expected response from unit.
-	// Match heartbeat response
-	else if (self.login === false && data.match(/V|SMX/)) {
-		self.login = true;
-		self.status(self.STATUS_OK);
-		debug("logged in");
-	}
-	else if (self.login === false && data.match('login incorrect')) {
-		self.log('error', "incorrect username/password (expected no password)");
-		self.status(self.STATUS_ERROR, 'Incorrect user/pass');
-	}
-	// Heatbeat to keep connection alive.
-	if (self.login === true) {
-		clearInterval(self.heartbeat_interval);
-		var beat_period = 180; // Seconds
-		self.heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
-		function heartbeat() {
-			self.login = false;
-			self.status(self.STATUS_WARNING,'Checking Connection');
-			self.socket.write("1I"+ "\n"); // should respond with Switcher description (short) eg: Inf01*SMX
-			debug("Checking Connection");
-		}
-	}
-	else {
-		debug("data nologin", data);
-	}
-};
-
 instance.prototype.init = function() {
 	var self = this;
 
@@ -78,9 +34,52 @@ instance.prototype.init = function() {
 	self.init_tcp();
 };
 
+instance.prototype.incomingData = function(data) {
+	var self = this;
+	debug(data);
+
+	// Match part of the copyright response from unit when a connection is made.
+	if (self.login === false && data.match(/Extron Electronics/)) {
+		self.status(self.STATUS_WARNING,'Logging in');
+		self.socket.write("I\n"); // Matrix information request
+	}
+
+	if (self.login === false && data.match(/Password:/)) {
+		self.status(self.STATUS_WARNING,'Logging in');
+		self.socket.write("\r" +self.config.password+ "\r"); // Enter Password Set
+	}
+
+	// Match login sucess response from unit.
+	else if (self.login === false && data.match(/Login/)) {
+		self.login = true;
+		self.status(self.STATUS_OK);
+		debug("logged in");
+	}
+	// Match expected response from unit.
+	else if (self.login === false && data.match(/V|SMX/)) {
+		self.login = true;
+		self.status(self.STATUS_OK);
+		debug("logged in");
+	}
+	// Heatbeat to keep connection alive.
+	function heartbeat() {
+		self.login = false;
+		self.status(self.STATUS_WARNING,'Checking Connection');
+		self.socket.write("1I\n"); // should respond with Switcher description (short) eg: Inf01*SMX
+		debug("Checking Connection");
+	}
+   	if (self.login === true) {
+		clearInterval(self.heartbeat_interval);
+		var beat_period = 60; // Seconds
+		self.heartbeat_interval = setInterval(heartbeat, beat_period * 1000);
+	}
+	else {
+		debug("data nologin", data);
+	}
+};
+
 instance.prototype.init_tcp = function() {
 	var self = this;
-	var receivebuffer = '';
 
 	if (self.socket !== undefined) {
 		self.socket.destroy();
@@ -100,16 +99,11 @@ instance.prototype.init_tcp = function() {
 		self.socket.on('error', function (err) {
 			debug("Network error", err);
 			self.log('error',"Network error: " + err.message);
+			self.login = false;
 		});
 
 		self.socket.on('connect', function () {
 			debug("Connected");
-			self.login = false;
-		});
-
-		self.socket.on('error', function (err) {
-			debug("Network error", err);
-			self.log('error',"Network error: " + err.message);
 			self.login = false;
 		});
 
@@ -122,12 +116,12 @@ instance.prototype.init_tcp = function() {
 		self.socket.on("iac", function(type, info) {
 			// tell remote we WONT do anything we're asked to DO
 			if (type == 'DO') {
-				socket.write(new Buffer([ 255, 252, info ]));
+				self.socket.write(new Buffer([ 255, 252, info ]));
 			}
 
 			// tell the remote DONT do whatever they WILL offer
 			if (type == 'WILL') {
-				socket.write(new Buffer([ 255, 254, info ]));
+				self.socket.write(new Buffer([ 255, 254, info ]));
 			}
 		});
 	}
@@ -157,6 +151,12 @@ instance.prototype.config_fields = function () {
 			width: 12,
 			default: '192.168.254.254',
 			regex: self.REGEX_IP
+		},
+		{
+			type: 'textinput',
+			id: 'password',
+			label: 'Admin or User Password',
+			width: 8
 		}
 	]
 };
@@ -170,7 +170,7 @@ instance.prototype.destroy = function() {
 		self.socket.destroy();
 	}
 
-	debug("destroy", self.id);;
+	debug("destroy", self.id);
 };
 
 instance.prototype.actions = function(system) {
@@ -305,13 +305,6 @@ instance.prototype.action = function(action) {
 			cmd = opt.preset +',';
 			break;
 
-	}
-
-	if (cmd !== undefined) {
-			if (self.tcp !== undefined) {
-					debug('sending ', cmd, "to", self.tcp.host);
-					self.tcp.send(cmd);
-			}
 	}
 
 	if (cmd !== undefined) {
